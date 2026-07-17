@@ -155,8 +155,8 @@ def _fontes(refresh=False):
         # cache de versão antiga (sem as colunas novas) força recarga
         if ("dn" in fontes["pessoas"].columns
                 and "data_criacao" in fontes["ativos"].columns
-                and "is_dynamic" in fontes["ativos"].columns
-                and "ultima_inventariacao" in fontes["specs"].columns):
+                and "ultima_inventariacao" in fontes["specs"].columns
+                and "Pwd" not in fontes["ferr"].columns):   # cache antigo (com senhas) força recarga
             return fontes
 
     pessoas = read_from_bq(f"""SELECT f.chave_join, f.chave_email, f.usuario, f.nome_completo,
@@ -183,7 +183,8 @@ def _fontes(refresh=False):
     adobe = clean_cols(google_sheets_to_dataframe(SHEET_ADOBE[0], SHEET_ADOBE[1], client=client))
     ms    = clean_cols(google_sheets_to_dataframe(SHEET_MS[0],    SHEET_MS[1],    client=client))
     ferr  = clean_cols(google_sheets_to_dataframe(SHEET_FERR[0],  SHEET_FERR[1],  client=client))
-
+    ms   = ms.drop(columns=[c for c in ("Senha", "Pwd", "LoginAdmin") if c in ms.columns])
+    ferr = ferr.drop(columns=[c for c in ("Senha", "Pwd", "LoginAdmin") if c in ferr.columns])
     fontes = dict(pessoas=pessoas, ativos=ativos, specs=specs, softwares=softwares,
                   adobe=adobe, ms=ms, ferr=ferr)
     for n, df in fontes.items():
